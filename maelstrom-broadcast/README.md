@@ -40,16 +40,16 @@ Command:
 Results:
 
 ```shell
-:servers {:send-count 19442,
-          :recv-count 19409,
-          :msg-count 19442,
-          :msgs-per-op 10.861452}
+:servers {:send-count 8464,
+          :recv-count 8464,
+          :msg-count 8464,
+          :msgs-per-op 5.014218}
           
 :stable-latencies {0 0,
-                    0.5 606,
-                    0.95 758,
-                    0.99 773,
-                    1 788}
+                    0.5 521,
+                    0.95 687,
+                    0.99 730,
+                    1 755}
 ```
 
 Verified correct results with `--nemesis partition`.

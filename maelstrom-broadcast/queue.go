@@ -44,6 +44,10 @@ func (q *queue) start(ctx context.Context) {
 			return
 		case <-ticker.C:
 			N := len(q.pending)
+			if N == 0 { // no messages to send
+				break
+			}
+
 			nums := make([]float64, N)
 			for i := 0; i < N; i++ {
 				nums[i] = <-q.pending

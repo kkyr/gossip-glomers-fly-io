@@ -31,7 +31,10 @@ func main() {
 }
 
 func broadcast(msg maelstrom.Message) error {
-	var body map[string]any
+	var body struct {
+		Message  float64   `json:"message"`
+		Messages []float64 `json:"messages"`
+	}
 	if err := json.Unmarshal(msg.Body, &body); err != nil {
 		return err
 	}
@@ -40,22 +43,33 @@ func broadcast(msg maelstrom.Message) error {
 		"type": "broadcast_ok",
 	}
 
-	num := body["message"].(float64)
-	mu.Lock()
-	if seen[num] {
-		mu.Unlock()
-		return node.Reply(msg, response)
+	var nums []float64
+	if len(body.Messages) > 0 {
+		nums = body.Messages
+	} else {
+		nums = append(nums, body.Message)
 	}
 
-	seen[num] = true
+	var notSeen []float64
+	mu.Lock()
+	for _, num := range nums {
+		if !seen[num] {
+			notSeen = append(notSeen, num)
+			seen[num] = true
+		}
+	}
 	mu.Unlock()
+
+	if len(notSeen) == 0 {
+		return node.Reply(msg, response)
+	}
 
 	for neighbour, q := range neighbourQueues {
 		// do not broadcast to node that sent it to us
 		if neighbour == msg.Src {
 			continue
 		}
-		q.enqueue(num)
+		q.enqueue(notSeen...)
 	}
 
 	return node.Reply(msg, response)

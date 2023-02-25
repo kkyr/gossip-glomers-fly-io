@@ -12,7 +12,7 @@ import (
 var (
 	node *maelstrom.Node
 
-	mu   sync.Mutex
+	mu   sync.RWMutex
 	seen map[float64]bool
 
 	neighbourQueues map[string]*queue
@@ -62,12 +62,12 @@ func broadcast(msg maelstrom.Message) error {
 }
 
 func read(msg maelstrom.Message) error {
-	mu.Lock()
 	var messages []float64
+	mu.RLock()
 	for k := range seen {
 		messages = append(messages, k)
 	}
-	mu.Unlock()
+	mu.RUnlock()
 
 	return node.Reply(msg, map[string]any{
 		"messages": messages,
@@ -87,10 +87,6 @@ func topology(msg maelstrom.Message) error {
 	log.Printf("received topology, my neighbours are %+v", neighbours)
 
 	for _, id := range neighbours {
-		// we don't care about ourselves
-		if id == node.ID() {
-			continue
-		}
 		if _, ok := neighbourQueues[id]; !ok {
 			q := newQueue(id)
 			go q.start(context.Background())

@@ -43,7 +43,7 @@ func (q *queue) start(ctx context.Context) {
 				"message": num,
 			}
 
-			go func(num float64) {
+			go func() {
 				ctx, cancel := context.WithTimeout(ctx, q.timeout)
 				_, err := node.SyncRPC(ctx, q.nodeID, body)
 				if err != nil {
@@ -52,7 +52,7 @@ func (q *queue) start(ctx context.Context) {
 					q.enqueue(num)
 				}
 				cancel()
-			}(num)
+			}()
 		}
 	}
 }

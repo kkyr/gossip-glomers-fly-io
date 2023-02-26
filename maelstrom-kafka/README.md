@@ -22,4 +22,6 @@ Results:
         :error-types (),
         :info-txn-causes ()},
  :valid? true}
+ 
+Everything looks good! ヽ(‘ー`)ノ
 ```

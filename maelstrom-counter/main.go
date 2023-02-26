@@ -65,6 +65,8 @@ func read(msg maelstrom.Message) error {
 		} else if err == nil {
 			break
 		}
+
+		log.Printf("read: CAS fail, v: %v, v2: %v", v, v2)
 	}
 
 	return node.Reply(msg, map[string]any{
@@ -79,15 +81,10 @@ func addDelta(delta int) error {
 		return err
 	}
 
-	v2 := newValue(v.Counter)
+	v2 := newValue(v.Counter + delta)
 	err = kv.CompareAndSwap(context.Background(), counterKey, v, v2, true)
 	if err != nil {
-		return err
-	}
-
-	v3 := newValue(v2.Counter + delta)
-	err = kv.CompareAndSwap(context.Background(), counterKey, v2, v3, true)
-	if err != nil {
+		log.Printf("addDelta: new CAS fail, v: %v, v2: %v", v, v2)
 		return err
 	}
 
